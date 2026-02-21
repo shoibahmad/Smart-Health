@@ -7,8 +7,9 @@ import {
     Phone, Video, MoreVertical, Check, CheckCheck
 } from 'lucide-react';
 
-import { collection, query, where, getDocs, addDoc, onSnapshot, orderBy, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
+import { sendMessage as apiSendMessage } from '../services/api';
 
 const ChatPage = () => {
     const { user } = useAuth();
@@ -100,21 +101,7 @@ const ChatPage = () => {
         const userId = user.uid || user.id;
 
         try {
-            // Add message
-            await addDoc(collection(db, "messages"), {
-                conversation_id: activeConversation.id,
-                sender_id: userId,
-                content: newMessage,
-                created_at: serverTimestamp()
-            });
-
-            // Update conversation last message
-            await updateDoc(doc(db, "conversations", activeConversation.id), {
-                last_message: newMessage,
-                last_message_at: serverTimestamp(),
-                // could increment unread count for other user
-            });
-
+            await apiSendMessage(activeConversation.id, newMessage);
             setNewMessage('');
         } catch (error) {
             console.error('Failed to send message', error);
@@ -143,9 +130,9 @@ const ChatPage = () => {
 
     if (loading) {
         return (
-            <div style={{ paddingTop: '120px', textAlign: 'center' }}>
+            <div style={{ paddingTop: '120px', textAlign: 'center', background: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
-                    <MessageCircle size={40} style={{ color: '#8b5cf6' }} />
+                    <MessageCircle size={40} style={{ color: 'var(--primary)' }} />
                 </motion.div>
                 <p style={{ marginTop: '1rem', color: 'var(--text-muted)' }}>Loading chats...</p>
             </div>
@@ -158,19 +145,22 @@ const ChatPage = () => {
             height: '100vh',
             display: 'flex',
             maxWidth: '1400px',
-            margin: '0 auto'
+            margin: '0 auto',
+            background: 'var(--bg-color)'
         }}>
             {/* Sidebar - Conversations List */}
             <div style={{
                 width: '350px',
-                borderRight: '1px solid rgba(255,255,255,0.05)',
+                borderRight: '1px solid var(--glass-border)',
                 display: 'flex',
                 flexDirection: 'column',
-                background: 'rgba(15, 23, 42, 0.5)'
+                background: '#ffffff',
+                boxShadow: 'var(--shadow-sm)',
+                zIndex: 10
             }}>
-                <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.3rem' }}>
-                        <MessageCircle size={24} style={{ color: '#8b5cf6' }} />
+                <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--glass-border)' }}>
+                    <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.3rem', color: 'var(--text-main)' }}>
+                        <MessageCircle size={24} style={{ color: 'var(--primary)' }} />
                         Messages
                     </h2>
                     <p style={{ margin: '0.5rem 0 0', color: 'var(--text-muted)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -189,13 +179,13 @@ const ChatPage = () => {
                         conversations.map(conv => (
                             <motion.div
                                 key={conv.id}
-                                whileHover={{ background: 'rgba(139, 92, 246, 0.1)' }}
+                                whileHover={{ background: '#f8f9fa' }}
                                 onClick={() => selectConversation(conv)}
                                 style={{
                                     padding: '1rem 1.5rem',
                                     cursor: 'pointer',
-                                    borderBottom: '1px solid rgba(255,255,255,0.03)',
-                                    background: activeConversation?.id === conv.id ? 'rgba(139, 92, 246, 0.15)' : 'transparent',
+                                    borderBottom: '1px solid var(--glass-border)',
+                                    background: activeConversation?.id === conv.id ? '#f1f5f9' : '#ffffff',
                                     display: 'flex',
                                     gap: '0.75rem'
                                 }}
@@ -203,16 +193,17 @@ const ChatPage = () => {
                                 <div style={{
                                     width: '48px', height: '48px', borderRadius: '50%',
                                     background: user?.role === 'doctor'
-                                        ? 'linear-gradient(135deg, #60a5fa, #3b82f6)'
-                                        : 'linear-gradient(135deg, #10b981, #06b6d4)',
+                                        ? 'var(--primary)'
+                                        : '#10b981',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: '1.1rem', fontWeight: 700, color: 'white', flexShrink: 0
+                                    fontSize: '1.1rem', fontWeight: 700, color: 'white', flexShrink: 0,
+                                    boxShadow: 'var(--shadow-sm)'
                                 }}>
                                     {(user?.role === 'doctor' ? conv.patient_name : conv.doctor_name)?.charAt(0)}
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <h4 style={{ margin: 0, fontSize: '0.95rem' }}>
+                                        <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-main)' }}>
                                             {user?.role === 'doctor' ? conv.patient_name : `Dr. ${conv.doctor_name}`}
                                         </h4>
                                         {conv.last_message_at && (
@@ -231,9 +222,10 @@ const ChatPage = () => {
                                 {conv.unread_count > 0 && (
                                     <span style={{
                                         width: '22px', height: '22px', borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
+                                        background: 'var(--danger)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '0.75rem', fontWeight: 600, color: 'white', alignSelf: 'center'
+                                        fontSize: '0.75rem', fontWeight: 600, color: 'white', alignSelf: 'center',
+                                        boxShadow: 'var(--shadow-sm)'
                                     }}>
                                         {conv.unread_count}
                                     </span>
@@ -245,31 +237,34 @@ const ChatPage = () => {
             </div>
 
             {/* Chat Area */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-color)' }}>
                 {activeConversation ? (
                     <>
                         {/* Chat Header */}
                         <div style={{
                             padding: '1rem 1.5rem',
-                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                            borderBottom: '1px solid var(--glass-border)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            background: 'rgba(15, 23, 42, 0.5)'
+                            background: '#ffffff',
+                            boxShadow: 'var(--shadow-sm)',
+                            zIndex: 5
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                 <div style={{
                                     width: '44px', height: '44px', borderRadius: '50%',
                                     background: user?.role === 'doctor'
-                                        ? 'linear-gradient(135deg, #60a5fa, #3b82f6)'
-                                        : 'linear-gradient(135deg, #10b981, #06b6d4)',
+                                        ? 'var(--primary)'
+                                        : '#10b981',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: '1rem', fontWeight: 700, color: 'white'
+                                    fontSize: '1rem', fontWeight: 700, color: 'white',
+                                    boxShadow: 'var(--shadow-sm)'
                                 }}>
                                     {(user?.role === 'doctor' ? activeConversation.patient_name : activeConversation.doctor_name)?.charAt(0)}
                                 </div>
                                 <div>
-                                    <h3 style={{ margin: 0, fontSize: '1rem' }}>
+                                    <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)' }}>
                                         {user?.role === 'doctor'
                                             ? activeConversation.patient_name
                                             : `Dr. ${activeConversation.doctor_name}`}
@@ -278,10 +273,10 @@ const ChatPage = () => {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button style={{ background: 'rgba(139, 92, 246, 0.2)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '10px', padding: '0.6rem', color: 'white' }}>
+                                <button style={{ background: '#f8f9fa', border: '1px solid var(--glass-border)', borderRadius: '10px', padding: '0.6rem', color: 'var(--primary)', cursor: 'pointer' }}>
                                     <Phone size={18} />
                                 </button>
-                                <button style={{ background: 'rgba(139, 92, 246, 0.2)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '10px', padding: '0.6rem', color: 'white' }}>
+                                <button style={{ background: '#f8f9fa', border: '1px solid var(--glass-border)', borderRadius: '10px', padding: '0.6rem', color: 'var(--primary)', cursor: 'pointer' }}>
                                     <Video size={18} />
                                 </button>
                             </div>
@@ -307,13 +302,15 @@ const ChatPage = () => {
                                         padding: '0.85rem 1.1rem',
                                         borderRadius: msg.is_mine ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                                         background: msg.is_mine
-                                            ? 'linear-gradient(135deg, #8b5cf6, #6366f1)'
-                                            : 'rgba(255,255,255,0.05)',
-                                        boxShadow: msg.is_mine ? '0 4px 15px rgba(139, 92, 246, 0.3)' : 'none'
+                                            ? 'var(--primary)'
+                                            : '#ffffff',
+                                        color: msg.is_mine ? 'white' : 'var(--text-main)',
+                                        border: msg.is_mine ? 'none' : '1px solid var(--glass-border)',
+                                        boxShadow: 'var(--shadow-sm)'
                                     }}>
                                         <p style={{ margin: 0, lineHeight: 1.5 }}>{msg.content}</p>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', justifyContent: 'flex-end', marginTop: '0.4rem' }}>
-                                            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)' }}>
+                                            <span style={{ fontSize: '0.7rem', color: msg.is_mine ? 'rgba(255,255,255,0.8)' : 'var(--text-muted)' }}>
                                                 {formatTime(msg.created_at)}
                                             </span>
                                             {msg.is_mine && <CheckCheck size={14} style={{ color: '#10b981' }} />}
@@ -326,11 +323,13 @@ const ChatPage = () => {
 
                         {/* Message Input */}
                         <form onSubmit={sendMessage} style={{
-                            padding: '1rem 1.5rem',
-                            borderTop: '1px solid rgba(255,255,255,0.05)',
+                            padding: '1.25rem 1.5rem',
+                            borderTop: '1px solid var(--glass-border)',
                             display: 'flex',
                             gap: '0.75rem',
-                            background: 'rgba(15, 23, 42, 0.5)'
+                            background: '#ffffff',
+                            boxShadow: '0 -4px 10px rgba(0, 0, 0, 0.02)',
+                            zIndex: 5
                         }}>
                             <input
                                 type="text"
@@ -342,8 +341,10 @@ const ChatPage = () => {
                                     padding: '0.9rem 1.25rem',
                                     borderRadius: '25px',
                                     marginBottom: 0,
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid rgba(139, 92, 246, 0.2)'
+                                    background: '#f8f9fa',
+                                    border: '1px solid var(--glass-border)',
+                                    color: 'var(--text-main)',
+                                    outline: 'none'
                                 }}
                             />
                             <motion.button
@@ -354,11 +355,12 @@ const ChatPage = () => {
                                 style={{
                                     width: '50px', height: '50px', borderRadius: '50%',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
-                                    border: 'none', cursor: 'pointer'
+                                    background: sending || !newMessage.trim() ? '#e2e8f0' : 'var(--primary)',
+                                    border: 'none', cursor: sending || !newMessage.trim() ? 'not-allowed' : 'pointer',
+                                    boxShadow: sending || !newMessage.trim() ? 'none' : 'var(--shadow-sm)'
                                 }}
                             >
-                                <Send size={20} style={{ color: 'white', marginLeft: '2px' }} />
+                                <Send size={20} style={{ color: sending || !newMessage.trim() ? '#94a3b8' : 'white', marginLeft: '2px' }} />
                             </motion.button>
                         </form>
                     </>
@@ -367,8 +369,8 @@ const ChatPage = () => {
                         flex: 1, display: 'flex', flexDirection: 'column',
                         alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)'
                     }}>
-                        <MessageCircle size={64} style={{ opacity: 0.2, marginBottom: '1.5rem' }} />
-                        <h3>Select a conversation</h3>
+                        <MessageCircle size={64} style={{ opacity: 0.3, marginBottom: '1.5rem', color: 'var(--primary)' }} />
+                        <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>Select a conversation</h3>
                         <p>Choose a chat from the sidebar to start messaging</p>
                     </div>
                 )}

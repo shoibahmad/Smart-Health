@@ -48,22 +48,23 @@ const LoginPage = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '2rem'
+            padding: '2rem',
+            background: 'var(--bg-color)'
         }}>
-            <div className="glass-card" style={{ maxWidth: '420px', width: '100%', padding: '2.5rem' }}>
-                <h1 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Welcome Back</h1>
+            <div className="glass-card" style={{ maxWidth: '420px', width: '100%', padding: '2.5rem', background: '#ffffff', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-md)', borderRadius: '16px' }}>
+                <h1 style={{ marginBottom: '0.5rem', textAlign: 'center', color: 'var(--text-main)' }}>Welcome Back</h1>
                 <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '2rem' }}>
                     Sign in to continue to Smart Health
                 </p>
 
                 {error && (
                     <div style={{
-                        background: 'rgba(239, 68, 68, 0.1)',
-                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        background: '#fef2f2',
+                        border: '1px solid #fecaca',
                         borderRadius: '8px',
                         padding: '0.75rem',
                         marginBottom: '1.5rem',
-                        color: '#f87171',
+                        color: 'var(--danger)',
                         fontSize: '0.9rem'
                     }}>
                         {error}
@@ -78,9 +79,9 @@ const LoginPage = () => {
                         width: '100%',
                         padding: '0.875rem',
                         borderRadius: '10px',
-                        background: 'white',
-                        color: '#333',
-                        border: 'none',
+                        background: '#ffffff',
+                        color: 'var(--text-main)',
+                        border: '1px solid var(--glass-border)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -88,8 +89,12 @@ const LoginPage = () => {
                         gap: '0.75rem',
                         fontWeight: 600,
                         fontSize: '0.95rem',
-                        marginBottom: '1.5rem'
+                        marginBottom: '1.5rem',
+                        boxShadow: 'var(--shadow-sm)',
+                        transition: 'background 0.2s'
                     }}
+                    onMouseOver={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                    onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
                 >
                     <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: 20, height: 20 }} />
                     Continue with Google
@@ -115,9 +120,9 @@ const LoginPage = () => {
                                 width: '100%',
                                 padding: '0.875rem 0.875rem 0.875rem 44px',
                                 borderRadius: '10px',
-                                background: 'rgba(255,255,255,0.05)',
+                                background: '#ffffff',
                                 border: '1px solid var(--glass-border)',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 fontSize: '0.95rem'
                             }}
                         />
@@ -135,9 +140,9 @@ const LoginPage = () => {
                                 width: '100%',
                                 padding: '0.875rem 44px 0.875rem 44px',
                                 borderRadius: '10px',
-                                background: 'rgba(255,255,255,0.05)',
+                                background: '#ffffff',
                                 border: '1px solid var(--glass-border)',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 fontSize: '0.95rem'
                             }}
                         />
@@ -160,7 +165,7 @@ const LoginPage = () => {
                     </div>
 
                     <div style={{ textAlign: 'right', marginBottom: '1.5rem' }}>
-                        <Link to="/forgot-password" style={{ color: '#60a5fa', fontSize: '0.9rem', textDecoration: 'none' }}>
+                        <Link to="/forgot-password" style={{ color: 'var(--primary)', fontSize: '0.9rem', textDecoration: 'none' }}>
                             Forgot password?
                         </Link>
                     </div>
@@ -172,12 +177,13 @@ const LoginPage = () => {
                             width: '100%',
                             padding: '0.875rem',
                             borderRadius: '10px',
-                            background: 'linear-gradient(90deg, #3b82f6, #2563eb)',
+                            background: 'var(--primary)',
                             color: 'white',
                             border: 'none',
                             cursor: 'pointer',
                             fontWeight: 600,
-                            fontSize: '0.95rem'
+                            fontSize: '0.95rem',
+                            boxShadow: 'var(--shadow-sm)'
                         }}
                     >
                         {loading ? 'Signing in...' : 'Sign In'}
@@ -186,7 +192,7 @@ const LoginPage = () => {
 
                 <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--text-muted)' }}>
                     Don't have an account?{' '}
-                    <Link to="/register" style={{ color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}>
+                    <Link to="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>
                         Sign Up
                     </Link>
                 </p>

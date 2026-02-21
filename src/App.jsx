@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoadingScreen from './components/LoadingScreen';
@@ -7,6 +7,7 @@ import LandingPage from './pages/LandingPage';
 import MainApp from './pages/MainApp';
 import DoctorDashboard from './pages/DoctorDashboard';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import PatientDashboard from './pages/PatientDashboard';
 import ChatPage from './pages/ChatPage';
 
 import { AuthProvider } from './context/AuthContext';
@@ -44,6 +45,8 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/dashboard" element={<PatientDashboard />} />
+              <Route path="/patient" element={<Navigate to="/dashboard" replace />} />
               <Route path="/doctor" element={<DoctorDashboard />} />
               <Route path="/admin" element={<SuperAdminDashboard />} />
               <Route path="/chat" element={<ChatPage />} />

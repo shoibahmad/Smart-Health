@@ -13,7 +13,7 @@ const MainApp = () => {
         setLoading(true);
         try {
             const result = await analyzeSymptoms(symptoms);
-            setAnalysis(result);
+            setAnalysis({ ...result, symptoms });
             setStep('analysis');
         } catch (error) {
             console.error("Error analyzing symptoms:", error);
@@ -42,8 +42,7 @@ const MainApp = () => {
 
             {step === 'booking' && analysis && (
                 <BookingFlow
-                    department={analysis.department}
-                    recommendedDoctor={analysis.recommended_doctor}
+                    analysis={analysis}
                 />
             )}
 

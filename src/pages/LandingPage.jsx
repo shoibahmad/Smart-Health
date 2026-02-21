@@ -9,8 +9,9 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getDoctors } from '../services/api';
 
 const LandingPage = () => {
     const { user } = useAuth();
@@ -32,9 +33,7 @@ const LandingPage = () => {
     const fetchDoctors = async () => {
         setLoading(true);
         try {
-            let q = query(collection(db, "users"), where("role", "==", "doctor"));
-            const snapshot = await getDocs(q);
-            let docsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            let docsList = await getDoctors();
 
             if (searchQuery) {
                 docsList = docsList.filter(d =>
@@ -83,11 +82,10 @@ const LandingPage = () => {
                 textAlign: 'center',
                 position: 'relative',
                 overflow: 'hidden',
-                padding: '2rem'
+                padding: '2rem',
+                background: 'linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%)'
             }}>
-                {/* Background Blobs */}
-                <div style={{ position: 'absolute', top: '10%', left: '5%', width: '400px', height: '400px', background: '#8b5cf6', filter: 'blur(120px)', opacity: 0.15, zIndex: -1 }} />
-                <div style={{ position: 'absolute', bottom: '10%', right: '5%', width: '400px', height: '400px', background: '#06b6d4', filter: 'blur(120px)', opacity: 0.15, zIndex: -1 }} />
+                {/* Background removed for cleaner Material look */}
 
                 <motion.div
                     initial="hidden"
@@ -101,13 +99,12 @@ const LandingPage = () => {
                         alignItems: 'center',
                         gap: '0.5rem',
                         padding: '0.5rem 1.25rem',
-                        background: 'rgba(139, 92, 246, 0.1)',
-                        color: '#a78bfa',
+                        background: '#e8f0fe',
+                        color: 'var(--primary)',
                         borderRadius: '50px',
-                        fontSize: '0.9rem',
+                        fontSize: '0.95rem',
                         fontWeight: 600,
                         marginBottom: '1.5rem',
-                        border: '1px solid rgba(139, 92, 246, 0.2)'
                     }}>
                         <Shield size={16} /> Trusted by 10,000+ Patients
                     </motion.div>
@@ -116,23 +113,24 @@ const LandingPage = () => {
                         fontSize: 'clamp(2.5rem, 5vw, 4rem)',
                         fontWeight: 800,
                         marginBottom: '1.5rem',
-                        lineHeight: 1.1
+                        lineHeight: 1.1,
+                        color: 'var(--text-main)',
+                        letterSpacing: '-1px'
                     }}>
                         Find Your Perfect
                         <span style={{
                             display: 'block',
-                            background: 'linear-gradient(135deg, #8b5cf6, #06b6d4, #10b981)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent'
+                            color: 'var(--primary)',
                         }}>Healthcare Specialist</span>
                     </motion.h1>
 
                     <motion.p variants={fadeIn} style={{
-                        fontSize: '1.2rem',
+                        fontSize: '1.15rem',
                         color: 'var(--text-muted)',
                         marginBottom: '2.5rem',
                         maxWidth: '700px',
-                        margin: '0 auto 2.5rem'
+                        margin: '0 auto 2.5rem',
+                        lineHeight: 1.6
                     }}>
                         Search top-rated doctors by specialization, view their services, prices, and book appointments instantly.
                     </motion.p>
@@ -163,11 +161,12 @@ const LandingPage = () => {
                                 style={{
                                     width: '100%',
                                     padding: '1rem 1rem 1rem 48px',
-                                    borderRadius: '14px',
+                                    borderRadius: '12px',
                                     marginBottom: 0,
-                                    background: 'rgba(30, 41, 59, 0.8)',
-                                    border: '1px solid rgba(139, 92, 246, 0.2)',
-                                    fontSize: '1rem'
+                                    background: '#ffffff',
+                                    border: '1px solid var(--glass-border)',
+                                    fontSize: '1rem',
+                                    boxShadow: 'var(--shadow-sm)'
                                 }}
                             />
                         </div>
@@ -184,11 +183,12 @@ const LandingPage = () => {
                                 style={{
                                     width: '100%',
                                     padding: '1rem 1rem 1rem 48px',
-                                    borderRadius: '14px',
+                                    borderRadius: '12px',
                                     marginBottom: 0,
-                                    background: 'rgba(30, 41, 59, 0.8)',
-                                    border: '1px solid rgba(139, 92, 246, 0.2)',
-                                    fontSize: '1rem'
+                                    background: '#ffffff',
+                                    border: '1px solid var(--glass-border)',
+                                    fontSize: '1rem',
+                                    boxShadow: 'var(--shadow-sm)'
                                 }}
                             />
                         </div>
@@ -198,13 +198,15 @@ const LandingPage = () => {
                             type="submit"
                             style={{
                                 padding: '1rem 2rem',
-                                borderRadius: '14px',
+                                borderRadius: '12px',
                                 fontSize: '1rem',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem',
-                                background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
-                                boxShadow: '0 4px 20px rgba(139, 92, 246, 0.3)'
+                                background: 'var(--primary)',
+                                color: 'white',
+                                border: 'none',
+                                boxShadow: 'var(--shadow-sm)'
                             }}
                         >
                             <Search size={20} /> Search Doctors
@@ -229,13 +231,14 @@ const LandingPage = () => {
                                 padding: '0.75rem 1.25rem',
                                 borderRadius: '30px',
                                 background: searchQuery === spec.name
-                                    ? `linear-gradient(135deg, ${spec.color}, ${spec.color}88)`
-                                    : 'rgba(255,255,255,0.03)',
-                                border: `1px solid ${searchQuery === spec.name ? 'transparent' : 'rgba(255,255,255,0.1)'}`,
-                                color: 'white',
+                                    ? 'var(--primary)'
+                                    : '#ffffff',
+                                border: '1px solid var(--glass-border)',
+                                color: searchQuery === spec.name ? 'white' : 'var(--text-main)',
                                 fontSize: '0.9rem',
+                                fontWeight: 500,
                                 cursor: 'pointer',
-                                boxShadow: searchQuery === spec.name ? `0 4px 15px ${spec.color}40` : 'none'
+                                boxShadow: 'var(--shadow-sm)'
                             }}
                         >
                             <spec.icon size={18} style={{ color: searchQuery === spec.name ? 'white' : spec.color }} />
@@ -496,22 +499,30 @@ const LandingPage = () => {
                             key={i}
                             whileHover={{ y: -5 }}
                             className="glass-card"
-                            style={{ padding: '2rem', textAlign: 'left' }}
+                            style={{
+                                padding: '2rem',
+                                textAlign: 'left',
+                                background: '#ffffff',
+                                border: '1px solid var(--glass-border)',
+                                borderRadius: '12px',
+                                boxShadow: 'var(--shadow-sm)'
+                            }}
                         >
                             <div style={{
                                 width: '50px',
                                 height: '50px',
-                                borderRadius: '14px',
-                                background: `${feature.color}20`,
+                                borderRadius: '12px',
+                                background: '#f8f9fa',
+                                border: '1px solid var(--glass-border)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 marginBottom: '1.5rem'
                             }}>
-                                <feature.icon size={24} style={{ color: feature.color }} />
+                                <feature.icon size={24} style={{ color: 'var(--primary)' }} />
                             </div>
-                            <h3 style={{ marginBottom: '0.75rem' }}>{feature.title}</h3>
-                            <p style={{ color: 'var(--text-muted)', margin: 0 }}>{feature.desc}</p>
+                            <h3 style={{ marginBottom: '0.75rem', fontWeight: 600, color: 'var(--text-main)' }}>{feature.title}</h3>
+                            <p style={{ color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>{feature.desc}</p>
                         </motion.div>
                     ))}
                 </div>
@@ -523,10 +534,11 @@ const LandingPage = () => {
                     maxWidth: '800px',
                     margin: '0 auto',
                     padding: '4rem',
-                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1))',
-                    border: '1px solid rgba(139, 92, 246, 0.2)'
+                    background: '#e8f0fe',
+                    border: '1px solid var(--glass-border)',
+                    borderRadius: '16px'
                 }}>
-                    <h2 style={{ marginBottom: '1rem' }}>Ready to Get Started?</h2>
+                    <h2 style={{ marginBottom: '1rem', color: 'var(--primary)', fontWeight: 700 }}>Ready to Get Started?</h2>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
                         Describe your symptoms and let our AI find the perfect doctor for you.
                     </p>
@@ -548,7 +560,7 @@ const LandingPage = () => {
                     </Link>
                 </div>
             </section>
-        </div>
+        </div >
     );
 };
 

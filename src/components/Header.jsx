@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Activity, Menu, X, LogOut, User, ChevronDown,
-    Stethoscope, Shield, Heart, Calendar
+    Stethoscope, Shield, Heart, Calendar, Info
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -30,10 +30,13 @@ const Header = () => {
         { name: 'Home', path: '/', icon: Heart },
         { name: 'Checkup', path: '/checkup', icon: Stethoscope },
         { name: 'Services', path: '/#services', icon: Calendar },
+        { name: 'About Project', path: '#', onClick: () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), icon: Info }
     ];
 
     const getRoleColor = (role) => {
         switch (role) {
+            case 'superadmin':
+            case 'admin':
             case 'superuser': return '#f472b6';
             case 'doctor': return '#34d399';
             default: return '#60a5fa';
@@ -42,6 +45,8 @@ const Header = () => {
 
     const getRoleLabel = (role) => {
         switch (role) {
+            case 'superadmin':
+            case 'admin':
             case 'superuser': return 'Admin';
             case 'doctor': return 'Doctor';
             default: return 'Patient';
@@ -56,80 +61,77 @@ const Header = () => {
                 left: 0,
                 right: 0,
                 zIndex: 100,
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 padding: scrolled ? '0.75rem 2rem' : '1rem 2rem',
-                background: scrolled
-                    ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)'
-                    : 'transparent',
-                backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
-                borderBottom: scrolled ? '1px solid rgba(139, 92, 246, 0.2)' : 'none',
-                boxShadow: scrolled ? '0 4px 30px rgba(139, 92, 246, 0.1)' : 'none'
+                background: scrolled ? 'rgba(255, 255, 255, 0.98)' : 'transparent',
+                backdropFilter: scrolled ? 'blur(10px)' : 'none',
+                borderBottom: scrolled ? '1px solid var(--glass-border)' : 'none',
+                boxShadow: scrolled ? 'var(--shadow-sm)' : 'none'
             }}>
                 <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
                     {/* Logo */}
                     <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <motion.div
-                            whileHover={{ rotate: 360 }}
-                            transition={{ duration: 0.6 }}
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ duration: 0.2 }}
                             style={{
-                                width: '44px',
-                                height: '44px',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #06b6d4 50%, #10b981 100%)',
-                                borderRadius: '14px',
+                                width: '40px',
+                                height: '40px',
+                                background: 'var(--primary)',
+                                borderRadius: '12px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 color: 'white',
-                                boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)'
+                                boxShadow: '0 2px 8px rgba(26, 115, 232, 0.3)'
                             }}>
-                            <Activity size={26} />
+                            <Activity size={24} />
                         </motion.div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <span style={{
-                                fontSize: '1.3rem',
-                                fontWeight: 800,
-                                background: 'linear-gradient(135deg, #fff 0%, #c4b5fd 50%, #67e8f9 100%)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
+                                fontSize: '1.25rem',
+                                fontWeight: 700,
+                                color: 'var(--text-main)',
                                 letterSpacing: '-0.5px'
                             }}>
                                 Smart Health
                             </span>
-                            <span style={{ fontSize: '0.65rem', color: '#94a3b8', letterSpacing: '2px', textTransform: 'uppercase' }}>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600 }}>
                                 AI Healthcare
                             </span>
                         </div>
                     </Link>
 
                     {/* Desktop Nav */}
-                    <nav className="desktop-nav" style={{ display: 'none', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.4rem', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <nav className="desktop-nav" style={{ display: 'none', gap: '0.5rem', background: 'transparent', padding: '0.2rem' }}>
                         {navLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 to={link.path}
                                 style={{
-                                    color: '#cbd5e1',
+                                    color: 'var(--text-muted)',
                                     textDecoration: 'none',
-                                    fontSize: '0.9rem',
+                                    fontSize: '0.95rem',
                                     fontWeight: 500,
                                     padding: '0.5rem 1rem',
-                                    borderRadius: '20px',
+                                    borderRadius: '8px',
                                     transition: 'all 0.2s',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '0.4rem'
+                                    gap: '0.5rem'
                                 }}
                                 onMouseOver={(e) => {
-                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
-                                    e.currentTarget.style.color = '#fff';
+                                    e.currentTarget.style.background = '#f1f3f4';
+                                    e.currentTarget.style.color = 'var(--text-main)';
                                 }}
                                 onMouseOut={(e) => {
                                     e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = '#cbd5e1';
+                                    e.currentTarget.style.color = 'var(--text-muted)';
                                 }}
+                                onClick={link.onClick ? (e) => { e.preventDefault(); link.onClick(); } : undefined}
                             >
-                                <link.icon size={16} />
+                                <link.icon size={18} />
                                 {link.name}
                             </Link>
                         ))}
@@ -147,6 +149,15 @@ const Header = () => {
                         {user ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                 {/* Role-based Dashboard Links */}
+                                {user.role === 'patient' && (
+                                    <Link to="/dashboard" style={{
+                                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                        color: '#0ea5e9', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem',
+                                        padding: '0.4rem 0.8rem', borderRadius: '8px', background: 'rgba(14, 165, 233, 0.1)'
+                                    }}>
+                                        <Activity size={16} /> Dashboard
+                                    </Link>
+                                )}
                                 {user.role === 'doctor' && (
                                     <Link to="/doctor" style={{
                                         display: 'flex', alignItems: 'center', gap: '0.4rem',
@@ -156,7 +167,7 @@ const Header = () => {
                                         <Stethoscope size={16} /> Dashboard
                                     </Link>
                                 )}
-                                {user.role === 'superuser' && (
+                                {['superadmin', 'admin', 'superuser'].includes(user.role) && (
                                     <Link to="/admin" style={{
                                         display: 'flex', alignItems: 'center', gap: '0.4rem',
                                         color: '#f472b6', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem',
@@ -172,26 +183,27 @@ const Header = () => {
                                         onClick={() => setProfileOpen(!profileOpen)}
                                         style={{
                                             display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                            background: 'rgba(255,255,255,0.05)',
-                                            border: '1px solid rgba(255,255,255,0.1)',
-                                            borderRadius: '30px',
+                                            background: '#ffffff',
+                                            border: '1px solid var(--glass-border)',
+                                            borderRadius: '8px',
                                             padding: '0.4rem 0.8rem 0.4rem 0.5rem',
-                                            color: 'white',
-                                            cursor: 'pointer'
+                                            color: 'var(--text-main)',
+                                            cursor: 'pointer',
+                                            boxShadow: 'var(--shadow-sm)'
                                         }}
                                     >
                                         <div style={{
                                             width: '32px', height: '32px', borderRadius: '50%',
-                                            background: `linear-gradient(135deg, ${getRoleColor(user.role)}, #8b5cf6)`,
+                                            background: getRoleColor(user.role),
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontSize: '0.85rem', fontWeight: 700
+                                            fontSize: '0.85rem', fontWeight: 700, color: 'white'
                                         }}>
                                             {user.full_name?.charAt(0).toUpperCase()}
                                         </div>
-                                        <span style={{ fontSize: '0.85rem', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        <span style={{ fontSize: '0.85rem', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
                                             {user.full_name?.split(' ')[0]}
                                         </span>
-                                        <ChevronDown size={16} style={{ transform: profileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                                        <ChevronDown size={16} color="var(--text-muted)" style={{ transform: profileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                                     </button>
 
                                     <AnimatePresence>
@@ -204,18 +216,17 @@ const Header = () => {
                                                     position: 'absolute',
                                                     top: '110%',
                                                     right: 0,
-                                                    background: 'rgba(30, 41, 59, 0.98)',
-                                                    backdropFilter: 'blur(20px)',
-                                                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                                                    background: '#ffffff',
+                                                    border: '1px solid var(--glass-border)',
                                                     borderRadius: '12px',
                                                     padding: '0.5rem',
                                                     minWidth: '180px',
-                                                    boxShadow: '0 10px 40px rgba(0,0,0,0.3)'
+                                                    boxShadow: 'var(--shadow-md)'
                                                 }}
                                             >
-                                                <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>{user.full_name}</p>
-                                                    <p style={{ margin: 0, fontSize: '0.75rem', color: getRoleColor(user.role) }}>{getRoleLabel(user.role)}</p>
+                                                <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--glass-border)' }}>
+                                                    <p style={{ margin: 0, fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-main)' }}>{user.full_name}</p>
+                                                    <p style={{ margin: 0, fontSize: '0.75rem', color: getRoleColor(user.role), fontWeight: 600 }}>{getRoleLabel(user.role)}</p>
                                                 </div>
                                                 <button
                                                     onClick={handleLogout}
@@ -225,12 +236,14 @@ const Header = () => {
                                                         background: 'transparent',
                                                         border: 'none',
                                                         padding: '0.75rem 1rem',
-                                                        color: '#f87171',
+                                                        color: 'var(--danger)',
                                                         cursor: 'pointer',
-                                                        borderRadius: '8px',
-                                                        fontSize: '0.85rem'
+                                                        borderRadius: '6px',
+                                                        fontSize: '0.85rem',
+                                                        fontWeight: 500,
+                                                        boxShadow: 'none'
                                                     }}
-                                                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(248, 113, 113, 0.1)'}
+                                                    onMouseOver={(e) => e.currentTarget.style.background = '#fef2f2'}
                                                     onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                                                 >
                                                     <LogOut size={16} /> Sign Out
@@ -243,11 +256,11 @@ const Header = () => {
                         ) : (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                 <Link to="/login" style={{
-                                    color: '#cbd5e1', textDecoration: 'none', fontWeight: 500, fontSize: '0.9rem',
+                                    color: 'var(--primary)', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem',
                                     padding: '0.5rem 1rem', borderRadius: '8px', transition: 'all 0.2s'
                                 }}
-                                    onMouseOver={(e) => e.currentTarget.style.color = '#fff'}
-                                    onMouseOut={(e) => e.currentTarget.style.color = '#cbd5e1'}
+                                    onMouseOver={(e) => e.currentTarget.style.background = '#f1f3f4'}
+                                    onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                                 >Sign In</Link>
                                 <Link to="/register">
                                     <motion.button
@@ -275,11 +288,12 @@ const Header = () => {
                         whileTap={{ scale: 0.9 }}
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         style={{
-                            background: 'rgba(139, 92, 246, 0.2)',
+                            background: '#f1f3f4',
                             padding: '0.5rem',
-                            borderRadius: '10px',
-                            color: 'white',
-                            border: '1px solid rgba(139, 92, 246, 0.3)'
+                            borderRadius: '8px',
+                            color: 'var(--text-main)',
+                            border: '1px solid var(--glass-border)',
+                            boxShadow: 'none'
                         }}
                     >
                         {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -295,9 +309,11 @@ const Header = () => {
                             exit={{ opacity: 0, height: 0 }}
                             style={{
                                 overflow: 'hidden',
-                                background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
-                                borderTop: '1px solid rgba(139, 92, 246, 0.2)',
-                                marginTop: '1rem'
+                                background: '#ffffff',
+                                borderTop: '1px solid var(--glass-border)',
+                                marginTop: '1rem',
+                                borderRadius: '8px',
+                                boxShadow: 'var(--shadow-md)'
                             }}
                         >
                             <div style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem', gap: '0.75rem' }}>
@@ -305,40 +321,46 @@ const Header = () => {
                                     <Link
                                         key={link.name}
                                         to={link.path}
-                                        onClick={() => setMobileMenuOpen(false)}
+                                        onClick={link.onClick ? (e) => { e.preventDefault(); link.onClick(); setMobileMenuOpen(false); } : () => setMobileMenuOpen(false)}
                                         style={{
-                                            color: 'white', textDecoration: 'none', fontSize: '1.1rem',
+                                            color: 'var(--text-main)', textDecoration: 'none', fontSize: '1.1rem',
                                             display: 'flex', alignItems: 'center', gap: '0.75rem',
-                                            padding: '0.75rem 1rem', borderRadius: '10px',
-                                            background: 'rgba(255,255,255,0.03)'
+                                            padding: '0.75rem 1rem', borderRadius: '8px',
+                                            background: '#f8f9fa',
+                                            fontWeight: 500
                                         }}
                                     >
-                                        <link.icon size={20} style={{ color: '#8b5cf6' }} />
+                                        <link.icon size={20} style={{ color: 'var(--primary)' }} />
                                         {link.name}
                                     </Link>
                                 ))}
                                 {user && (
                                     <>
+                                        {user.role === 'patient' && (
+                                            <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} style={{ color: '#0ea5e9', textDecoration: 'none', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f0f9ff', borderRadius: '8px', fontWeight: 600 }}>
+                                                <Activity size={20} /> My Dashboard
+                                            </Link>
+                                        )}
                                         {user.role === 'doctor' && (
-                                            <Link to="/doctor" onClick={() => setMobileMenuOpen(false)} style={{ color: '#34d399', textDecoration: 'none', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(52, 211, 153, 0.1)', borderRadius: '10px' }}>
+                                            <Link to="/doctor" onClick={() => setMobileMenuOpen(false)} style={{ color: '#34d399', textDecoration: 'none', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#ecfdf5', borderRadius: '8px', fontWeight: 600 }}>
                                                 <Stethoscope size={20} /> Doctor Dashboard
                                             </Link>
                                         )}
-                                        {user.role === 'superuser' && (
-                                            <Link to="/admin" onClick={() => setMobileMenuOpen(false)} style={{ color: '#f472b6', textDecoration: 'none', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(244, 114, 182, 0.1)', borderRadius: '10px' }}>
+                                        {['superadmin', 'admin', 'superuser'].includes(user.role) && (
+                                            <Link to="/admin" onClick={() => setMobileMenuOpen(false)} style={{ color: '#f472b6', textDecoration: 'none', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#fdf2f8', borderRadius: '8px', fontWeight: 600 }}>
                                                 <Shield size={20} /> Admin Portal
                                             </Link>
                                         )}
                                     </>
                                 )}
-                                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--glass-border)' }}>
                                     {user ? (
-                                        <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ width: '100%', background: 'rgba(248, 113, 113, 0.2)', color: '#f87171' }}>
+                                        <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ width: '100%', background: '#fef2f2', color: 'var(--danger)', boxShadow: 'none' }}>
                                             <LogOut size={18} style={{ marginRight: '0.5rem' }} /> Sign Out
                                         </button>
                                     ) : (
                                         <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                                            <button style={{ width: '100%', background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)' }}>Sign In</button>
+                                            <button style={{ width: '100%' }}>Sign In</button>
                                         </Link>
                                     )}
                                 </div>

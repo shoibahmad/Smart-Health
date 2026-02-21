@@ -18,15 +18,21 @@ const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleGoogleLogin = async () => {
+    // Role selection state
+    const [role, setRole] = useState('patient');
+    const [showGoogleModal, setShowGoogleModal] = useState(false);
+
+    // Normal Google Login (Triggered after modal role selection)
+    const proceedWithGoogleLogin = async (selectedRole) => {
         try {
             setLoading(true);
-            await googleLogin();
+            setShowGoogleModal(false);
+            await googleLogin(selectedRole);
             navigate('/');
         } catch (err) {
             setError("Google login failed. Please try again.");
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleRegister = async (e) => {
@@ -46,7 +52,7 @@ const RegisterPage = () => {
         setLoading(true);
 
         try {
-            await signup(email, password, { full_name: fullName, role: 'patient' });
+            await signup(email, password, { full_name: fullName, role: role });
             navigate('/');
         } catch (err) {
             setError(err.message || 'Registration failed');
@@ -63,38 +69,91 @@ const RegisterPage = () => {
             justifyContent: 'center',
             padding: '2rem'
         }}>
-            <div className="glass-card" style={{ maxWidth: '420px', width: '100%', padding: '2.5rem' }}>
+            {/* Google Role Selection Modal */}
+            {showGoogleModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <div className="card fade-in" style={{ padding: '2.5rem', maxWidth: '400px', width: '90%', textAlign: 'center', background: '#ffffff', borderRadius: '16px', boxShadow: 'var(--shadow-lg)' }}>
+                        <h2 style={{ marginBottom: '1rem', color: 'var(--text-main)' }}>Select Your Role</h2>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Are you joining as a Patient or a Doctor?</p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <button
+                                onClick={() => proceedWithGoogleLogin('patient')}
+                                style={{
+                                    padding: '1rem', borderRadius: '12px', border: '1px solid var(--primary)',
+                                    background: 'var(--primary)', color: 'white', cursor: 'pointer', fontWeight: 600,
+                                    boxShadow: 'var(--shadow-sm)'
+                                }}
+                            >
+                                Continue as Patient
+                            </button>
+                            <button
+                                onClick={() => proceedWithGoogleLogin('doctor')}
+                                style={{
+                                    padding: '1rem', borderRadius: '12px', border: '1px solid #8b5cf6',
+                                    background: '#8b5cf6', color: 'white', cursor: 'pointer', fontWeight: 600,
+                                    boxShadow: 'var(--shadow-sm)'
+                                }}
+                            >
+                                Continue as Doctor
+                            </button>
+                            <button
+                                onClick={() => proceedWithGoogleLogin('superadmin')}
+                                style={{
+                                    padding: '1rem', borderRadius: '12px', border: '1px solid var(--danger)',
+                                    background: 'var(--danger)', color: 'white', cursor: 'pointer', fontWeight: 600,
+                                    boxShadow: 'var(--shadow-sm)'
+                                }}
+                            >
+                                Continue as Super Admin
+                            </button>
+                            <button
+                                onClick={() => setShowGoogleModal(false)}
+                                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', marginTop: '1rem', cursor: 'pointer' }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="glass-card" style={{ maxWidth: '420px', width: '100%', padding: '2.5rem', background: '#ffffff', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-md)', borderRadius: '16px' }}>
                 <>
-                    <h1 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Create Account</h1>
+                    <h1 style={{ marginBottom: '0.5rem', textAlign: 'center', color: 'var(--text-main)' }}>Create Account</h1>
                     <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '2rem' }}>
                         Join Smart Health today
                     </p>
 
                     {error && (
                         <div style={{
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            background: '#fef2f2',
+                            border: '1px solid #fecaca',
                             borderRadius: '8px',
                             padding: '0.75rem',
                             marginBottom: '1.5rem',
-                            color: '#f87171',
+                            color: 'var(--danger)',
                             fontSize: '0.9rem'
                         }}>
                             {error}
                         </div>
                     )}
 
-                    {/* Google Login */}
+                    {/* Google Login Trigger */}
                     <button
-                        onClick={() => handleGoogleLogin()}
+                        onClick={() => setShowGoogleModal(true)}
                         disabled={loading}
                         style={{
                             width: '100%',
                             padding: '0.875rem',
                             borderRadius: '10px',
-                            background: 'white',
-                            color: '#333',
-                            border: 'none',
+                            background: '#ffffff',
+                            color: 'var(--text-main)',
+                            border: '1px solid var(--glass-border)',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -102,8 +161,12 @@ const RegisterPage = () => {
                             gap: '0.75rem',
                             fontWeight: 600,
                             fontSize: '0.95rem',
-                            marginBottom: '1.5rem'
+                            marginBottom: '1.5rem',
+                            boxShadow: 'var(--shadow-sm)',
+                            transition: 'background 0.2s'
                         }}
+                        onMouseOver={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                        onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
                     >
                         <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: 20, height: 20 }} />
                         Continue with Google
@@ -116,6 +179,53 @@ const RegisterPage = () => {
                     </div>
 
                     <form onSubmit={handleRegister}>
+                        {/* Role Selection Toggle */}
+                        <div style={{
+                            display: 'flex',
+                            background: '#f1f3f4',
+                            borderRadius: '12px',
+                            padding: '6px',
+                            marginBottom: '1.5rem',
+                            border: '1px solid var(--glass-border)'
+                        }}>
+                            <button
+                                type="button"
+                                onClick={() => setRole('patient')}
+                                style={{
+                                    flex: 1, padding: '0.65rem', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s',
+                                    background: role === 'patient' ? '#ffffff' : 'transparent',
+                                    color: role === 'patient' ? 'var(--primary)' : 'var(--text-muted)',
+                                    boxShadow: role === 'patient' ? 'var(--shadow-sm)' : 'none'
+                                }}
+                            >
+                                Patient
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setRole('doctor')}
+                                style={{
+                                    flex: 1, padding: '0.65rem', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s',
+                                    background: role === 'doctor' ? '#ffffff' : 'transparent',
+                                    color: role === 'doctor' ? '#8b5cf6' : 'var(--text-muted)',
+                                    boxShadow: role === 'doctor' ? 'var(--shadow-sm)' : 'none'
+                                }}
+                            >
+                                Doctor
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setRole('superadmin')}
+                                style={{
+                                    flex: 1, padding: '0.65rem', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s',
+                                    background: role === 'superadmin' ? '#ffffff' : 'transparent',
+                                    color: role === 'superadmin' ? 'var(--danger)' : 'var(--text-muted)',
+                                    boxShadow: role === 'superadmin' ? 'var(--shadow-sm)' : 'none'
+                                }}
+                            >
+                                Admin
+                            </button>
+                        </div>
+
                         <div style={{ position: 'relative', marginBottom: '1rem' }}>
                             <User size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <input
@@ -128,9 +238,9 @@ const RegisterPage = () => {
                                     width: '100%',
                                     padding: '0.875rem 0.875rem 0.875rem 44px',
                                     borderRadius: '10px',
-                                    background: 'rgba(255,255,255,0.05)',
+                                    background: '#ffffff',
                                     border: '1px solid var(--glass-border)',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.95rem'
                                 }}
                             />
@@ -148,9 +258,9 @@ const RegisterPage = () => {
                                     width: '100%',
                                     padding: '0.875rem 0.875rem 0.875rem 44px',
                                     borderRadius: '10px',
-                                    background: 'rgba(255,255,255,0.05)',
+                                    background: '#ffffff',
                                     border: '1px solid var(--glass-border)',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.95rem'
                                 }}
                             />
@@ -168,9 +278,9 @@ const RegisterPage = () => {
                                     width: '100%',
                                     padding: '0.875rem 44px 0.875rem 44px',
                                     borderRadius: '10px',
-                                    background: 'rgba(255,255,255,0.05)',
+                                    background: '#ffffff',
                                     border: '1px solid var(--glass-border)',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.95rem'
                                 }}
                             />
@@ -204,9 +314,9 @@ const RegisterPage = () => {
                                     width: '100%',
                                     padding: '0.875rem 0.875rem 0.875rem 44px',
                                     borderRadius: '10px',
-                                    background: 'rgba(255,255,255,0.05)',
+                                    background: '#ffffff',
                                     border: '1px solid var(--glass-border)',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.95rem'
                                 }}
                             />
@@ -219,12 +329,13 @@ const RegisterPage = () => {
                                 width: '100%',
                                 padding: '0.875rem',
                                 borderRadius: '10px',
-                                background: 'linear-gradient(90deg, #10b981, #059669)',
+                                background: 'var(--primary)',
                                 color: 'white',
                                 border: 'none',
                                 cursor: 'pointer',
                                 fontWeight: 600,
-                                fontSize: '0.95rem'
+                                fontSize: '0.95rem',
+                                boxShadow: 'var(--shadow-sm)'
                             }}
                         >
                             {loading ? 'Creating account...' : 'Create Account'}
@@ -233,7 +344,7 @@ const RegisterPage = () => {
 
                     <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--text-muted)' }}>
                         Already have an account?{' '}
-                        <Link to="/login" style={{ color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}>
+                        <Link to="/login" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>
                             Sign In
                         </Link>
                     </p>

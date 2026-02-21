@@ -41,9 +41,10 @@ const ForgotPasswordPage = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '2rem'
+            padding: '2rem',
+            background: 'var(--bg-color)'
         }}>
-            <div className="glass-card" style={{ maxWidth: '420px', width: '100%', padding: '2.5rem' }}>
+            <div className="glass-card" style={{ maxWidth: '420px', width: '100%', padding: '2.5rem', background: '#ffffff', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-md)', borderRadius: '16px' }}>
 
                 {step === 'email' && (
                     <>
@@ -51,13 +52,13 @@ const ForgotPasswordPage = () => {
                             <ArrowLeft size={18} /> Back to login
                         </Link>
 
-                        <h1 style={{ marginBottom: '0.5rem' }}>Forgot Password?</h1>
+                        <h1 style={{ marginBottom: '0.5rem', color: 'var(--text-main)' }}>Forgot Password?</h1>
                         <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
                             Enter your email and we'll send you a link to reset your password.
                         </p>
 
                         {error && (
-                            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', padding: '0.75rem', marginBottom: '1.5rem', color: '#f87171' }}>
+                            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '0.75rem', marginBottom: '1.5rem', color: 'var(--danger)' }}>
                                 {error}
                             </div>
                         )}
@@ -75,9 +76,9 @@ const ForgotPasswordPage = () => {
                                         width: '100%',
                                         padding: '0.875rem 0.875rem 0.875rem 44px',
                                         borderRadius: '10px',
-                                        background: 'rgba(255,255,255,0.05)',
+                                        background: '#ffffff',
                                         border: '1px solid var(--glass-border)',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         fontSize: '0.95rem'
                                     }}
                                 />
@@ -90,11 +91,12 @@ const ForgotPasswordPage = () => {
                                     width: '100%',
                                     padding: '0.875rem',
                                     borderRadius: '10px',
-                                    background: 'linear-gradient(90deg, #3b82f6, #2563eb)',
+                                    background: 'var(--primary)',
                                     color: 'white',
                                     border: 'none',
                                     cursor: 'pointer',
-                                    fontWeight: 600
+                                    fontWeight: 600,
+                                    boxShadow: 'var(--shadow-sm)'
                                 }}
                             >
                                 {loading ? 'Sending...' : 'Send Reset Link'}
@@ -106,9 +108,9 @@ const ForgotPasswordPage = () => {
                 {step === 'success' && (
                     <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📧</div>
-                        <h1 style={{ marginBottom: '0.5rem' }}>Check your email</h1>
+                        <h1 style={{ marginBottom: '0.5rem', color: 'var(--text-main)' }}>Check your email</h1>
                         <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
-                            We have sent a password reset link to <strong style={{ color: 'white' }}>{email}</strong>
+                            We have sent a password reset link to <strong style={{ color: 'var(--primary)' }}>{email}</strong>
                         </p>
                         <Link
                             to="/login"
@@ -116,10 +118,11 @@ const ForgotPasswordPage = () => {
                                 display: 'inline-block',
                                 padding: '0.875rem 2rem',
                                 borderRadius: '10px',
-                                background: 'linear-gradient(90deg, #3b82f6, #2563eb)',
+                                background: 'var(--primary)',
                                 color: 'white',
                                 textDecoration: 'none',
-                                fontWeight: 600
+                                fontWeight: 600,
+                                boxShadow: 'var(--shadow-sm)'
                             }}
                         >
                             Back to Login

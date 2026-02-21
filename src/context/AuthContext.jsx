@@ -33,11 +33,18 @@ export const AuthProvider = ({ children }) => {
                     if (userDoc.exists()) {
                         setUser({ ...firebaseUser, ...userDoc.data() });
                     } else {
-                        // If no firestore doc, just use firebase user (might happen if creation fails or first google login)
-                        // For Google login, we might want to create the doc here if it doesn't exist, 
-                        // but usually it's better to handle that in the login function.
-                        // However, onAuthStateChanged triggers on page reload too, so we need to fetch data.
-                        setUser(firebaseUser);
+                        // If no firestore doc exists yet (this happens immediately after signup 
+                        // before setDoc finishes), we just set the basic firebase user for now.
+                        // The signup function will update the user state with the role once setDoc finishes.
+
+                        // Avoid overriding the full state if the user object already has a custom role 
+                        // manually set by the handleEmailSignup or handleGoogleLogin
+                        setUser((currentUser) => {
+                            if (currentUser?.role && currentUser?.uid === firebaseUser.uid) {
+                                return currentUser;
+                            }
+                            return firebaseUser;
+                        });
                     }
                 } catch (error) {
                     console.error("Error fetching user data from Firestore:", error);
@@ -52,7 +59,7 @@ export const AuthProvider = ({ children }) => {
         return () => unsubscribe();
     }, []);
 
-    const handleGoogleLogin = async () => {
+    const handleGoogleLogin = async (role = 'patient') => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
@@ -61,14 +68,26 @@ export const AuthProvider = ({ children }) => {
             const userDoc = await getDoc(doc(db, "users", user.uid));
             if (!userDoc.exists()) {
                 // Create user document for Google Sign-In users
-                await setDoc(doc(db, "users", user.uid), {
+                const newUserObj = {
                     uid: user.uid,
                     email: user.email,
                     displayName: user.displayName,
                     photoURL: user.photoURL,
-                    role: 'patient', // Default role
+                    role: role,
                     createdAt: new Date().toISOString()
-                });
+                };
+                await setDoc(doc(db, "users", user.uid), newUserObj);
+                setUser({ ...user, ...newUserObj }); // Immediately update state
+            } else {
+                const existingData = userDoc.data();
+                // If the user selected a different role on the register page, update it
+                if (existingData.role !== role && window.location.pathname === '/register') {
+                    const updatedData = { ...existingData, role: role };
+                    await setDoc(doc(db, "users", user.uid), updatedData, { merge: true });
+                    setUser({ ...user, ...updatedData });
+                } else {
+                    setUser({ ...user, ...existingData }); // Exists, update state
+                }
             }
             return user;
         } catch (error) {
@@ -94,12 +113,16 @@ export const AuthProvider = ({ children }) => {
             const user = result.user;
 
             // Create user document in Firestore
-            await setDoc(doc(db, "users", user.uid), {
+            const newUserObj = {
                 uid: user.uid,
                 email: user.email,
                 ...additionalData,
                 createdAt: new Date().toISOString()
-            });
+            };
+            await setDoc(doc(db, "users", user.uid), newUserObj);
+
+            // Immediately update the user state with the new role to fix the race condition
+            setUser({ ...user, ...newUserObj });
 
             return user;
         } catch (error) {
@@ -117,12 +140,17 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateLocalUser = (updatedFields) => {
+        setUser(prev => prev ? { ...prev, ...updatedFields } : prev);
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
             googleLogin: handleGoogleLogin,
             login: handleEmailLogin,
             signup: handleEmailSignup,
+            updateLocalUser,
             logout,
             loading
         }}>
