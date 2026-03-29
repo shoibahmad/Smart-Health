@@ -1,0 +1,72 @@
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import LoadingScreen from './components/LoadingScreen';
+import LandingPage from './pages/LandingPage';
+import MainApp from './pages/MainApp';
+import DoctorDashboard from './pages/DoctorDashboard';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import PatientDashboard from './pages/PatientDashboard';
+import ChatPage from './pages/ChatPage';
+
+import { AuthProvider } from './context/AuthContext';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
+import AboutProject from './pages/AboutProject';
+import ApiDocs from './pages/ApiDocs';
+
+// Scroll to top on route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
+function App() {
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  if (initialLoading) {
+    return <LoadingScreen onComplete={() => setInitialLoading(false)} />;
+  }
+
+  return (
+    <AuthProvider>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <ScrollToTop />
+        <div className="App" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <Header />
+
+          <main style={{ flex: 1 }}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/checkup" element={<MainApp />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/dashboard" element={<PatientDashboard />} />
+              <Route path="/patient" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/doctor" element={<DoctorDashboard />} />
+              <Route path="/admin" element={<SuperAdminDashboard />} />
+              <Route path="/chat" element={<ChatPage />} />
+              <Route path="/chat/:conversationId" element={<ChatPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-conditions" element={<TermsConditions />} />
+              <Route path="/about-project" element={<AboutProject />} />
+              <Route path="/api-docs" element={<ApiDocs />} />
+            </Routes>
+          </main>
+
+          <Footer />
+        </div>
+      </Router>
+    </AuthProvider>
+  );
+}
+
+export default App;
