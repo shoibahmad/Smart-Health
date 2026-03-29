@@ -7,3 +7,5 @@ requests
 fastapi-mail
 icalendar
 apscheduler
+pypdf
+python-multipart
