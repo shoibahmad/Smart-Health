@@ -21,17 +21,33 @@ ENV/
 env/
 .env
 
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
 # Firebase
 firebase-debug.log
 firestore-debug.log
 pubsub-debug.log
 ui-debug.log
 
-# IDEs
+# IDEs & Editors
 .vscode/
+!.vscode/extensions.json
 .idea/
+.DS_Store
 *.swp
 *.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # Project specific
 backend/smart-health-51e3f-firebase-adminsdk-fbsvc-8a5938ff60.json
